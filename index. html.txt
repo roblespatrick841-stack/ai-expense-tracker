@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Expense Tracker — Weekly Allowance & Meal Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Header & Weekly Allowance Input -->
+    <header class="app-header">
+      <div class="title-group">
+        <h1>Food Expense Tracker</h1>
+        <p>Track weekly food allowance, daily meal spending, and category totals</p>
+      </div>
+
+      <div class="allowance-box">
+        <label for="allowanceInput">Weekly Allowance (₱)</label>
+        <div class="input-inline">
+          <span class="peso-sign">₱</span>
+          <input
+            type="number"
+            id="allowanceInput"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          />
+          <button type="button" id="updateAllowanceBtn" class="btn btn-primary">
+            Update
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Summary Metrics -->
+    <section class="summary-grid" aria-label="Weekly Summary">
+      <div class="metric-card">
+        <span class="metric-label">Weekly Allowance</span>
+        <strong class="metric-value" id="allowanceDisplay">₱0.00</strong>
+        <span class="metric-note">Set budget for the week</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Weekly Total Expenses</span>
+        <strong class="metric-value" id="totalExpensesDisplay">₱0.00</strong>
+        <span class="metric-note" id="mealCountDisplay">0 meals recorded</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Remaining Balance</span>
+        <strong class="metric-value balance-value" id="remainingBalanceDisplay">₱0.00</strong>
+        <div class="meter-track" aria-hidden="true">
+          <div class="meter-fill" id="allowanceProgressBar"></div>
+        </div>
+        <span class="metric-note" id="usagePercentDisplay">0% used</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Daily Average Food Spend</span>
+        <strong class="metric-value" id="dailyAverageDisplay">₱0.00</strong>
+        <span class="metric-note" id="topCategoryDisplay">Top category: None</span>
+      </div>
+    </section>
+
+    <!-- Main Dashboard -->
+    <main class="main-layout">
+      <!-- Left Column: Add Meal Form + Category Breakdown -->
+      <div class="column-side">
+        <section class="card" aria-labelledby="formHeading">
+          <div class="card-header">
+            <h2 id="formHeading">Add Food Expense</h2>
+          </div>
+
+          <form id="mealForm" class="meal-form" novalidate>
+            <div class="field">
+              <label for="mealName">Food / Meal Name</label>
+              <input
+                type="text"
+                id="mealName"
+                placeholder="e.g., Pancit Canton, Sisig Rice"
+                required
+              />
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="mealPrice">Price (₱)</label>
+                <input
+                  type="number"
+                  id="mealPrice"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="85.00"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="mealCategory">Category</label>
+                <select id="mealCategory">
+                  <option value="Breakfast">Breakfast</option>
+                  <option value="Lunch" selected>Lunch</option>
+                  <option value="Dinner">Dinner</option>
+                  <option value="Snacks">Snacks</option>
+                  <option value="Drinks">Drinks</option>
+                  <option value="Groceries">Groceries</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="mealDay">Day</label>
+              <select id="mealDay">
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </select>
+            </div>
+
+            <p id="formAlert" class="form-alert" role="alert" hidden></p>
+
+            <button type="submit" class="btn btn-primary btn-full">
+              Add Meal Expense
+            </button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="categoryHeading">
+          <div class="card-header">
+            <h2 id="categoryHeading">Budget / Category Breakdown</h2>
+          </div>
+          <div id="categoryBreakdown" class="category-list"></div>
+        </section>
+      </div>
+
+      <!-- Right Column: Daily Food Spending + Meals Table -->
+      <div class="column-main">
+        <section class="card" aria-labelledby="dailyHeading">
+          <div class="card-header">
+            <h2 id="dailyHeading">Daily Food Spending</h2>
+            <span class="pill-badge" id="peakDayBadge">Highest: —</span>
+          </div>
+          <div id="dailySpendingChart" class="daily-bars"></div>
+        </section>
+
+        <section class="card" aria-labelledby="mealsListHeading">
+          <div class="card-header card-header-wrap">
+            <h2 id="mealsListHeading">All Logged Meals</h2>
+            <div class="table-actions">
+              <select id="categoryFilter" aria-label="Filter meals by category">
+                <option value="All">All Categories</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Drinks">Drinks</option>
+                <option value="Groceries">Groceries</option>
+              </select>
+              <button type="button" id="resetMealsBtn" class="btn btn-danger-outline">
+                Clear Meals
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="meals-table">
+              <thead>
+                <tr>
+                  <th>Meal / Food</th>
+                  <th>Category</th>
+                  <th>Day</th>
+                  <th class="align-right">Price</th>
+                  <th class="align-center">Remove</th>
+                </tr>
+              </thead>
+              <tbody id="mealsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
